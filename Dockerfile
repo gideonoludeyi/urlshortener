@@ -1,8 +1,8 @@
 FROM python:3.9
 
-RUN pip install poetry
-
 WORKDIR /code
+
+RUN pip install poetry
 
 COPY poetry.lock pyproject.toml /code/
 
@@ -10,7 +10,7 @@ ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 
 RUN poetry config virtualenvs.create false && poetry install --no-dev --no-interaction --no-ansi
 
-COPY /urlshortener /code/app
+COPY /urlshortener /code/app/
 
 EXPOSE 8000
 
