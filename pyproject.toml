@@ -9,6 +9,7 @@ python = "^3.9"
 fastapi = "^0.74.1"
 uvicorn = {extras = ["standard"], version = "^0.17.5"}
 nanoid = "^2.0.0"
+autopep8 = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
