@@ -1,7 +1,6 @@
 import os
 from string import ascii_letters
 
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
 from nanoid import generate
@@ -9,7 +8,6 @@ from nanoid import generate
 from .client import Client
 from .clouddsclient import CloudDatastoreClient
 
-load_dotenv()
 SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 
 
