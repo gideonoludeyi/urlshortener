@@ -16,7 +16,7 @@ def generate_code():
 
 def get_client():
     SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
-    return get_cloud_datastore_client(service_account_filepath=SERVICE_ACCOUNT_FILEPATH)
+    yield from get_cloud_datastore_client(service_account_filepath=SERVICE_ACCOUNT_FILEPATH)
 
 
 app = FastAPI()
