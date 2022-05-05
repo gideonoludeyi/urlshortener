@@ -5,9 +5,8 @@ from .client import Client
 
 
 class CloudDatastoreClient(Client):
-    Kind = 'UrlMap'
-
-    def __init__(self, service_account_filename: str | None = None) -> None:
+    def __init__(self, kind: str = 'urls', service_account_filename: str | None = None) -> None:
+        self.kind = kind
         if service_account_filename is not None:
             credentials = service_account.Credentials.from_service_account_file(
                 service_account_filename)
@@ -17,7 +16,7 @@ class CloudDatastoreClient(Client):
             self.client = datastore.Client()
 
     def _to_key(self, code: str) -> datastore.Key:
-        return self.client.key(self.Kind, code)
+        return self.client.key(self.kind, code)
 
     def get(self, code: str) -> str | None:
         key = self._to_key(code)

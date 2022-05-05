@@ -19,6 +19,7 @@ def generate_code():
 
 
 client: Client = CloudDatastoreClient(
+    kind='urls',
     service_account_filename=SERVICE_ACCOUNT_FILEPATH)
 
 app = FastAPI()
