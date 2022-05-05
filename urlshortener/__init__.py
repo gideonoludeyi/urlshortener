@@ -1,5 +1,5 @@
 import os
-from string import ascii_letters
+from string import ascii_letters, digits
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -12,7 +12,7 @@ SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 
 
 def generate_code():
-    valid_chars = f'0123456789{ascii_letters}'
+    valid_chars = f'{digits}{ascii_letters}'
     return generate(alphabet=valid_chars, size=6)
 
 
