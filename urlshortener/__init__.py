@@ -1,7 +1,6 @@
 import os
-from string import ascii_letters
+from string import ascii_letters, digits
 
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
 from nanoid import generate
@@ -9,13 +8,12 @@ from nanoid import generate
 from .client import Client
 from .clouddsclient import CloudDatastoreClient
 
-load_dotenv()
 SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 
 
 def generate_code():
-    valid_chars = f'0123456789{ascii_letters}'
-    return generate(alphabet=valid_chars, size=6)  # 62^6 possible codes
+    valid_chars = f'{digits}{ascii_letters}'
+    return generate(alphabet=valid_chars, size=6)
 
 
 client: Client = CloudDatastoreClient(
