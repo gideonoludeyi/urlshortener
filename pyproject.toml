@@ -11,6 +11,8 @@ uvicorn = {extras = ["standard"], version = "^0.17.5"}
 nanoid = "^2.0.0"
 redis = "^4.1.4"
 google-cloud-datastore = "^2.5.1"
+Jinja2 = "^3.1.2"
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.6.0"

@@ -1,14 +1,13 @@
 import os
 from string import ascii_letters, digits
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from nanoid import generate
 
 from .client import Client
 from .clouddsclient import CloudDatastoreClient
-
-SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 
 
 def generate_code():
@@ -16,20 +15,23 @@ def generate_code():
     return generate(alphabet=valid_chars, size=6)
 
 
+SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 client: Client = CloudDatastoreClient(
     kind='urls',
     service_account_filename=SERVICE_ACCOUNT_FILEPATH)
 
 app = FastAPI()
 
+templates = Jinja2Templates(directory='templates')
+
 
 @app.get('/')
-def root():
-    return 'Hello world'
+def root(request: Request):
+    return templates.TemplateResponse('index.html', {'request': request})
 
 
 @app.post('/', response_class=JSONResponse)
-def shorten(url: str):
+def shorten(url: str = Form(...)):
     code = generate_code()
     while client.exists(code):
         code = generate_code()
