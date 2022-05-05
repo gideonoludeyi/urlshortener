@@ -14,3 +14,6 @@ class Client(AbstractContextManager, abc.ABC):
     @abc.abstractmethod
     def exists(self, code: str) -> bool:
         raise NotImplementedError
+
+    def __enter__(self) -> 'Client':
+        return self

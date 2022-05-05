@@ -4,7 +4,7 @@ from typing import Type
 from google.cloud import datastore
 from google.oauth2 import service_account
 
-from .client import Client
+from .base import Client
 
 
 class CloudDatastoreClient(Client):

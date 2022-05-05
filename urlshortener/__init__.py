@@ -6,8 +6,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from nanoid import generate
 
-from .client import Client
-from .clouddsclient import CloudDatastoreClient
+from .client import Client, get_cloud_datastore_client
 
 
 def generate_code():
@@ -15,12 +14,9 @@ def generate_code():
     return generate(alphabet=valid_chars, size=6)
 
 
-def get_client() -> Client:
+def get_client():
     SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
-    with CloudDatastoreClient(
-            kind='urls',
-            service_account_filename=SERVICE_ACCOUNT_FILEPATH) as client:
-        yield client
+    return get_cloud_datastore_client(service_account_filepath=SERVICE_ACCOUNT_FILEPATH)
 
 
 app = FastAPI()

@@ -3,7 +3,7 @@ from typing import Type
 
 from redis import Redis
 
-from .client import Client
+from .base import Client
 
 
 class RedisClient(Client):
