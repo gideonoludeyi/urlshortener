@@ -1,5 +1,6 @@
 __version__ = '0.1.0'
 
+import abc
 import os
 from string import ascii_letters
 
@@ -10,9 +11,24 @@ from nanoid import generate
 from redis import Redis
 
 
-class RedisClient:
+class Client(abc.ABC):
+    @abc.abstractmethod
+    def get(self, code: str) -> str | None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set(self, code: str, url: str) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def exists(self, code: str) -> bool:
+        raise NotImplementedError
+
+
+class RedisClient(Client):
     def __init__(self, host: str, port: int, password: str) -> None:
         self.redis = Redis(host=host, port=port, password=password)
+        super().__init__()
 
     def get(self, code: str) -> str | None:
         return self.redis.get(code)
@@ -35,8 +51,8 @@ def generate_code():
     return generate(alphabet=valid_chars, size=6)
 
 
-client = RedisClient(host=REDIS_HOSTNAME, port=REDIS_PORT,
-                     password=REDIS_PASSWORD)
+client: Client = RedisClient(host=REDIS_HOSTNAME, port=REDIS_PORT,
+                             password=REDIS_PASSWORD)
 app = FastAPI()
 
 
