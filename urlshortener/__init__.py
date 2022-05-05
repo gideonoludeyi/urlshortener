@@ -15,7 +15,7 @@ SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 
 def generate_code():
     valid_chars = f'0123456789{ascii_letters}'
-    return generate(alphabet=valid_chars, size=6)
+    return generate(alphabet=valid_chars, size=6)  # 62^6 possible codes
 
 
 client: Client = CloudDatastoreClient(
