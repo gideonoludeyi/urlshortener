@@ -9,11 +9,11 @@ python = "^3.9"
 fastapi = "^0.74.1"
 uvicorn = {extras = ["standard"], version = "^0.17.5"}
 nanoid = "^2.0.0"
-autopep8 = "^1.6.0"
 redis = "^4.1.4"
 python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
+autopep8 = "^1.6.0"
 pytest = "^5.2"
 
 [build-system]
