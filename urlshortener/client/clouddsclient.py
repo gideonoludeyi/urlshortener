@@ -8,11 +8,11 @@ from .base import Client
 
 
 class CloudDatastoreClient(Client):
-    def __init__(self, kind: str = 'urls', service_account_filename: str | None = None) -> None:
+    def __init__(self, kind: str = 'urls', service_account_filepath: str | None = None) -> None:
         self.kind = kind
-        if service_account_filename is not None:
+        if service_account_filepath is not None:
             credentials = service_account.Credentials.from_service_account_file(
-                service_account_filename)
+                service_account_filepath)
             self.client = datastore.Client(credentials=credentials)
         else:
             # imply credentials from the environment (eg: if deployed in a Google App Engine of same GCP project as Cloud Datastore)
