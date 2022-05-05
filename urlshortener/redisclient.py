@@ -9,7 +9,9 @@ class RedisClient(Client):
         super().__init__()
 
     def get(self, code: str) -> str | None:
-        return self.redis.get(code).decode('utf-8')
+        url = self.redis.get(code)
+        if url is not None:
+            return url.decode('utf-8')
 
     def set(self, code: str, url: str) -> None:
         self.redis.set(code, url)
