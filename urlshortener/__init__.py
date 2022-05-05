@@ -9,6 +9,21 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from nanoid import generate
 from redis import Redis
 
+
+class RedisClient:
+    def __init__(self, host: str, port: int, password: str) -> None:
+        self.redis = Redis(host=host, port=port, password=password)
+
+    def get(self, code: str) -> str | None:
+        return self.redis.get(code)
+
+    def set(self, code: str, url: str) -> None:
+        self.redis.set(code, url)
+
+    def exists(self, code: str) -> bool:
+        return self.redis.exists(code) == 1
+
+
 load_dotenv()
 REDIS_HOSTNAME = os.getenv('REDIS_HOSTNAME', 'redis')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
@@ -20,7 +35,8 @@ def generate_code():
     return generate(alphabet=valid_chars, size=6)
 
 
-client = Redis(host=REDIS_HOSTNAME, port=REDIS_PORT, password=REDIS_PASSWORD)
+client = RedisClient(host=REDIS_HOSTNAME, port=REDIS_PORT,
+                     password=REDIS_PASSWORD)
 app = FastAPI()
 
 
