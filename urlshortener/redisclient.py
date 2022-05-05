@@ -1,4 +1,5 @@
 from redis import Redis
+
 from .client import Client
 
 
@@ -8,7 +9,7 @@ class RedisClient(Client):
         super().__init__()
 
     def get(self, code: str) -> str | None:
-        return self.redis.get(code)
+        return self.redis.get(code).decode('utf-8')
 
     def set(self, code: str, url: str) -> None:
         self.redis.set(code, url)
