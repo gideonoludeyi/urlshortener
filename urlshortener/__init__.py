@@ -17,9 +17,10 @@ def generate_code():
 
 def get_client() -> Client:
     SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
-    return CloudDatastoreClient(
-        kind='urls',
-        service_account_filename=SERVICE_ACCOUNT_FILEPATH)
+    with CloudDatastoreClient(
+            kind='urls',
+            service_account_filename=SERVICE_ACCOUNT_FILEPATH) as client:
+        yield client
 
 
 app = FastAPI()

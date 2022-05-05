@@ -1,3 +1,6 @@
+from types import TracebackType
+from typing import Type
+
 from redis import Redis
 
 from .client import Client
@@ -18,3 +21,6 @@ class RedisClient(Client):
 
     def exists(self, code: str) -> bool:
         return self.redis.exists(code) == 1
+
+    def __exit__(self, __exc_type: Type[BaseException] | None, __exc_value: BaseException | None, __traceback: TracebackType | None) -> bool | None:
+        self.redis.close()

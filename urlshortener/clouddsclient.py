@@ -1,3 +1,6 @@
+import types
+from typing import Type
+
 from google.cloud import datastore
 from google.oauth2 import service_account
 
@@ -32,3 +35,6 @@ class CloudDatastoreClient(Client):
 
     def exists(self, code: str) -> bool:
         return self.get(code) is not None
+
+    def __exit__(self, __exc_type: Type[BaseException] | None, __exc_value: BaseException | None, __traceback: types.TracebackType | None) -> bool | None:
+        self.client.close()

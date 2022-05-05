@@ -1,7 +1,8 @@
 import abc
+from contextlib import AbstractContextManager
 
 
-class Client(abc.ABC):
+class Client(AbstractContextManager, abc.ABC):
     @abc.abstractmethod
     def get(self, code: str) -> str | None:
         raise NotImplementedError
