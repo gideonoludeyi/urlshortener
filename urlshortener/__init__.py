@@ -7,12 +7,10 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from nanoid import generate
 
 from .client import Client
-from .redisclient import RedisClient
+from .clouddsclient import CloudDatastoreClient
 
 load_dotenv()
-REDIS_HOSTNAME = os.getenv('REDIS_HOSTNAME', 'redis')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+SERVICE_ACCOUNT_FILEPATH = os.getenv('SERVICE_ACCOUNT_FILEPATH')
 
 
 def generate_code():
@@ -20,8 +18,9 @@ def generate_code():
     return generate(alphabet=valid_chars, size=6)
 
 
-client: Client = RedisClient(host=REDIS_HOSTNAME, port=REDIS_PORT,
-                             password=REDIS_PASSWORD)
+client: Client = CloudDatastoreClient(
+    service_account_filename=SERVICE_ACCOUNT_FILEPATH)
+
 app = FastAPI()
 
 
@@ -44,4 +43,4 @@ def redirect(code: str):
     url = client.get(code)
     if url is None:
         raise HTTPException(status_code=404, detail="Code not found")
-    return RedirectResponse(url=url.decode('utf-8'))
+    return RedirectResponse(url=url)
