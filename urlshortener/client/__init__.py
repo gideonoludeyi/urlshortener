@@ -1,9 +1,6 @@
-import os
-
-from urlshortener.client.redisclient import RedisClient
-
 from .base import Client
 from .clouddsclient import CloudDatastoreClient
+from .redisclient import RedisClient
 
 
 def get_cloud_datastore_client(kind='urls', service_account_filepath: str | None = None):
