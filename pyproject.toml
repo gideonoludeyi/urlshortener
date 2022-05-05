@@ -9,14 +9,18 @@ python = "^3.9"
 fastapi = "^0.74.1"
 uvicorn = {extras = ["standard"], version = "^0.17.5"}
 nanoid = "^2.0.0"
-redis = "^4.1.4"
-google-cloud-datastore = "^2.5.1"
 Jinja2 = "^3.1.2"
 python-multipart = "^0.0.5"
+google-cloud-datastore = {version = "^2.5.1", optional = true}
+redis = {version = "^4.2.2", optional = true}
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.6.0"
 pytest = "^5.2"
+
+[tool.poetry.extras]
+redis = ["redis"]
+google-cloud-datastore = ["google-cloud-datastore"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
