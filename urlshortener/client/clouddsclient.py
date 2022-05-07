@@ -2,13 +2,15 @@ import types
 from typing import Type
 
 from google.cloud import datastore
-from google.oauth2 import service_account
+from google.oauth2 import service_account  # type: ignore
 
 from .base import Client
 
 
 class CloudDatastoreClient(Client):
     def __init__(self, kind: str = 'urls', service_account_filepath: str | None = None) -> None:
+        super().__init__()
+
         self.kind = kind
         if service_account_filepath is not None:
             credentials = service_account.Credentials.from_service_account_file(
@@ -18,23 +20,26 @@ class CloudDatastoreClient(Client):
             # imply credentials from the environment (eg: if deployed in a Google App Engine of same GCP project as Cloud Datastore)
             self.client = datastore.Client()
 
-    def _to_key(self, code: str) -> datastore.Key:
-        return self.client.key(self.kind, code)
+    def _to_key(self, key: str) -> datastore.Key:
+        return self.client.key(self.kind, key)
 
-    def get(self, code: str) -> str | None:
-        key = self._to_key(code)
-        entity = self.client.get(key=key)
+    def get(self, key: str) -> dict | None:
+        datastore_key = self._to_key(key)
+        entity = self.client.get(key=datastore_key)
         if entity is not None:
-            return entity.get('url')
+            return dict(entity)
+        else:
+            return None
 
-    def set(self, code: str, url: str) -> None:
-        key = self._to_key(code)
-        entity = self.client.entity(key=key)
-        entity.update({'url': url})
+    def set(self, key: str, data: dict) -> None:
+        datastore_key = self._to_key(key)
+        entity = self.client.entity(key=datastore_key)
+        entity.update({**entity, **data})
         self.client.put(entity=entity)
 
-    def exists(self, code: str) -> bool:
-        return self.get(code) is not None
+    def exists(self, key: str) -> bool:
+        return self.get(key) is not None
 
     def __exit__(self, __exc_type: Type[BaseException] | None, __exc_value: BaseException | None, __traceback: types.TracebackType | None) -> bool | None:
         self.client.close()
+        return None

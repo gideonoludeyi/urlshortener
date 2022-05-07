@@ -1,26 +1,39 @@
+import json
 from types import TracebackType
 from typing import Type
 
-from redis import Redis
+from redis import Redis  # type: ignore
 
 from .base import Client
 
 
 class RedisClient(Client):
-    def __init__(self, host: str, port: int, password: str) -> None:
-        self.redis = Redis(host=host, port=port, password=password)
+    def __init__(self, host: str, port: int, password: str, *, prefix: str = 'urls:') -> None:
         super().__init__()
 
-    def get(self, code: str) -> str | None:
-        url = self.redis.get(code)
-        if url is not None:
-            return url.decode('utf-8')
+        self.redis = Redis(host=host, port=port, password=password)
+        self.prefix = prefix
 
-    def set(self, code: str, url: str) -> None:
-        self.redis.set(code, url)
+    def _to_key(self, key: str) -> str:
+        return self.prefix + key
 
-    def exists(self, code: str) -> bool:
-        return self.redis.exists(code) == 1
+    def get(self, key: str) -> dict | None:
+        key = self._to_key(key)
+        data = self.redis.get(key)
+        if data is not None:
+            return json.loads(data)
+        else:
+            return None
+
+    def set(self, key: str, data: dict) -> None:
+        key = self._to_key(key)
+        value = json.dumps(data)
+        self.redis.set(key, value)
+
+    def exists(self, key: str) -> bool:
+        key = self._to_key(key)
+        return self.redis.exists(key) == 1
 
     def __exit__(self, __exc_type: Type[BaseException] | None, __exc_value: BaseException | None, __traceback: TracebackType | None) -> bool | None:
         self.redis.close()
+        return None
