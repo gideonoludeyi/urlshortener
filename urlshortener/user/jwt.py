@@ -26,10 +26,9 @@ def create_access_token(email: str, expires_delta: timedelta = timedelta(minutes
 
 
 def decode_token(token: str):
-    json_data = token.split(' ', maxsplit=1)[1]  # strip off 'Bearer ' header
+    jwt_data = token.split(' ', maxsplit=1)[1]  # strip off 'Bearer ' header
 
-    data: dict = jwt.decode(
-        json_data, key=SECRET_KEY, algorithms=[ALGORITHM])
+    data: dict = jwt.decode(jwt_data, key=SECRET_KEY, algorithms=[ALGORITHM])
 
     return Payload(
         email=data['sub'],
