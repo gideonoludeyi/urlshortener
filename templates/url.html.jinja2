@@ -1,0 +1,27 @@
+{% extends "layout.html.jinja2" %}
+
+{% block content %}
+
+<a href="{{ request.url }}{{code}}" id="myInput" target="_blank">
+    {{ request.url }}{{code}}
+</a>
+<button onclick="myFunction()">Copy URL</button>
+
+<script>
+    function myFunction() {
+        /* Get the text field */
+        var copyText = document.getElementById('myInput');
+
+        /* Select the text field */
+        // copyText.select();
+        // copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+        /* Copy the text inside the text field */
+        navigator.clipboard.writeText(copyText.href);
+
+        /* Alert the copied text */
+        alert('Copied the text: ' + copyText.href);
+    }
+</script>
+
+{% endblock %}
