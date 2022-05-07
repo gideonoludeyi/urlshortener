@@ -1,5 +1,3 @@
-import calendar
-from curses import raw
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,7 +6,7 @@ from jose import JWTError  # type: ignore
 
 from ..client.base import Client
 from ..client.inmemoryclient import InMemoryClient
-from .jwt import create_access_token, decode_token
+from .jwt import create_access_token, decode_token, serialize_datetime
 from .pwd import hash_password, verify_password
 from .schema import User, UserInDB
 
@@ -35,6 +33,10 @@ def get_db():
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+class InvalidCredentials(Exception):
+    pass
+
+
 def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(get_db)) -> UserInDB:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,16 +47,16 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(g
     try:
         payload = decode_token(token)
     except JWTError as e:
-        raise credentials_exception from e
+        raise InvalidCredentials from e
 
     user = db.get(key=payload.email)
 
     if user is None:
-        raise credentials_exception
+        raise InvalidCredentials
 
     user_in_db = UserInDB(**user)
     if payload.issued_at < user_in_db.ignore_access_tokens_before:
-        raise credentials_exception
+        raise InvalidCredentials
 
     return user_in_db
 
@@ -84,15 +86,9 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(get_
         db=db)
 
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise InvalidCredentials
 
-    token = create_access_token(
-        email=user.email,
-        expires_delta=timedelta(minutes=15))
+    token = create_access_token(email=user.email)
     return {'access_token': token, 'token_type': 'bearer'}
 
 
@@ -113,5 +109,5 @@ def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(get
 @router.post('/logout')
 def logout(user: UserInDB = Depends(get_current_user), db: Client = Depends(get_db)):
     now = datetime.utcnow()
-    user.ignore_access_tokens_before = calendar.timegm(now.timetuple())
+    user.ignore_access_tokens_before = serialize_datetime(now)
     db.set(key=user.email, data=user.dict())
