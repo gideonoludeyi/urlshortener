@@ -7,7 +7,7 @@ from nanoid import generate  # type: ignore
 
 from .client import Client
 from .client.inmemoryclient import InMemoryClient
-from .user.api import router as user_router
+from .user.api import get_current_user, router as user_router
 
 
 def generate_code():
@@ -28,11 +28,16 @@ templates = Jinja2Templates(directory='templates')
 
 
 @app.get('/')
-def root(request: Request):
+def index(request: Request):
     return templates.TemplateResponse('index.html.jinja2', {'request': request})
 
 
-@app.post('/', response_class=JSONResponse)
+@app.get('/login')
+def login(request: Request):
+    return templates.TemplateResponse('login.html.jinja2', {'request': request})
+
+
+@app.post('/', response_class=JSONResponse, dependencies=[Depends(get_current_user)])
 def shorten(request: Request, url: str = Form(...), client: Client = Depends(get_client)):
     code = generate_code()
     while client.exists(code):
@@ -40,11 +45,6 @@ def shorten(request: Request, url: str = Form(...), client: Client = Depends(get
 
     client.set(code, {'url': url})
     return templates.TemplateResponse('url.html.jinja2', {'request': request, 'code': code})
-
-
-@app.get('/login')
-def login(request: Request):
-    return templates.TemplateResponse('login.html.jinja2', {'request': request})
 
 
 @app.get('/r/{code}')
