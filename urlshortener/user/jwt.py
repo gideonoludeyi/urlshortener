@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
+import os
 from jose import jwt  # type: ignore
 from pydantic import BaseModel
 import calendar
+
+SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'a-super-secret-key')
+ALGORITHM = 'HS256'
 
 
 class Payload(BaseModel):
@@ -17,7 +21,7 @@ def create_access_token(email: str, expires_delta: timedelta = timedelta(minutes
         'iat': calendar.timegm(now.timetuple()),
         'exp': calendar.timegm((now + expires_delta).timetuple()),
     }
-    token: str = jwt.encode(data, key='SECRET_KEY', algorithm='HS256')
+    token: str = jwt.encode(data, key=SECRET_KEY, algorithm=ALGORITHM)
     return token
 
 
@@ -25,7 +29,7 @@ def decode_token(token: str):
     json_data = token.split(' ', maxsplit=1)[1]  # strip off 'Bearer ' header
 
     data: dict = jwt.decode(
-        json_data, key='SECRET_KEY', algorithms=['HS256'])
+        json_data, key=SECRET_KEY, algorithms=[ALGORITHM])
 
     return Payload(
         email=data['sub'],
