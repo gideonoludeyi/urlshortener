@@ -7,7 +7,9 @@ from nanoid import generate  # type: ignore
 
 from .client import Client
 from .client.inmemoryclient import InMemoryClient
-from .user.api import get_current_user, router as user_router
+from .invalid_credentials import InvalidCredentials
+from .user.api import current_user
+from .user.api import router as user_router
 
 
 def generate_code():
@@ -27,6 +29,12 @@ app.include_router(user_router, prefix='/user')
 templates = Jinja2Templates(directory='templates')
 
 
+@app.exception_handler(InvalidCredentials)
+def redirect_to_login(request: Request, exc: InvalidCredentials):
+    print('INvalid')
+    return RedirectResponse('/login', status_code=401)
+
+
 @app.get('/')
 def index(request: Request):
     return templates.TemplateResponse('index.html.jinja2', {'request': request})
@@ -37,7 +45,7 @@ def login(request: Request):
     return templates.TemplateResponse('login.html.jinja2', {'request': request})
 
 
-@app.post('/', response_class=JSONResponse, dependencies=[Depends(get_current_user)])
+@app.post('/', response_class=JSONResponse, dependencies=[Depends(current_user)])
 def shorten(request: Request, url: str = Form(...), client: Client = Depends(get_client)):
     code = generate_code()
     while client.exists(code):

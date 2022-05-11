@@ -1,59 +1,21 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError  # type: ignore
+from fastapi.security import OAuth2PasswordRequestForm
 
 from ..client.base import Client
-from ..client.inmemoryclient import InMemoryClient
-from .jwt import create_access_token, decode_token, serialize_datetime
+from ..invalid_credentials import InvalidCredentials
+from .current_user import current_user
+from .jwt import create_access_token, serialize_datetime
 from .pwd import hash_password, verify_password
 from .schema import User, UserInDB
-from ..invalid_credentials import InvalidCredentials
+from .users_db import users_db
 
 router = APIRouter()
 
 
-client = InMemoryClient()
-
-client.set('johndoe@example.com', {
-    "email": "johndoe@example.com",
-    "hashed_password": "$2b$12$TtB2fBC0v4K1PfCwteiSD.Pd9Xuopkbl3K2hFll5/rj6wZw3yVzuW",
-})
-
-client.set('alice@example.com', {
-    "email": "alice@example.com",
-    "hashed_password": "$2b$12$1uAZBYM2t7NmBDuS67j.P.lln1SDnTcb5ZTp.yfxkuDBbrJZYuy.y",
-})
-
-
-def users_db():
-    return client
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(users_db)) -> UserInDB:
-    try:
-        payload = decode_token(token)
-    except JWTError as e:
-        raise InvalidCredentials from e
-
-    user = db.get(key=payload.email)
-
-    if user is None:
-        raise InvalidCredentials
-
-    user_in_db = UserInDB(**user)
-    if payload.issued_at < user_in_db.ignore_access_tokens_before:
-        raise InvalidCredentials
-
-    return user_in_db
-
-
 @router.get('/')
-def current_user(user: UserInDB = Depends(get_current_user)):
+def show_current_user(user: UserInDB = Depends(current_user)):
     return User(**user.dict())
 
 
@@ -98,7 +60,7 @@ def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(use
 
 
 @router.post('/logout')
-def logout(user: UserInDB = Depends(get_current_user), db: Client = Depends(users_db)):
+def logout(user: UserInDB = Depends(current_user), db: Client = Depends(users_db)):
     now = datetime.utcnow()
     user.ignore_access_tokens_before = serialize_datetime(now)
     db.set(key=user.email, data=user.dict())
