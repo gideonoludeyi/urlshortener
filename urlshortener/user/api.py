@@ -27,14 +27,14 @@ client.set('alice@example.com', {
 })
 
 
-def get_db():
+def users_db():
     return client
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(get_db)) -> UserInDB:
+def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(users_db)) -> UserInDB:
     try:
         payload = decode_token(token)
     except JWTError as e:
@@ -70,7 +70,7 @@ def authenticate_user(email: str, password: str, db: Client) -> User | None:
 
 
 @router.post('/token')
-def login(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(get_db)):
+def login(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(users_db)):
     user = authenticate_user(
         email=form.username,
         password=form.password,
@@ -84,7 +84,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(get_
 
 
 @router.post('/create', status_code=status.HTTP_201_CREATED)
-def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(get_db)):
+def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(users_db)):
     email = form.username
     hashed_password = hash_password(form.password)
 
@@ -98,7 +98,7 @@ def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(get
 
 
 @router.post('/logout')
-def logout(user: UserInDB = Depends(get_current_user), db: Client = Depends(get_db)):
+def logout(user: UserInDB = Depends(get_current_user), db: Client = Depends(users_db)):
     now = datetime.utcnow()
     user.ignore_access_tokens_before = serialize_datetime(now)
     db.set(key=user.email, data=user.dict())
