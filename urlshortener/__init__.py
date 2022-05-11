@@ -35,7 +35,6 @@ templates = Jinja2Templates(directory='templates')
 
 @app.exception_handler(InvalidCredentials)
 def redirect_to_login(request: Request, exc: InvalidCredentials):
-    print('INvalid')
     return RedirectResponse('/login', status_code=401)
 
 
