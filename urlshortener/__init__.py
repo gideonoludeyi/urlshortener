@@ -11,6 +11,10 @@ from .invalid_credentials import InvalidCredentials
 from .user.api import router as user_router
 from .user.current_user import current_user
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def generate_code():
     valid_chars = f'{digits}{ascii_letters}'
