@@ -3,8 +3,15 @@
 {% block content %}
 
 <form action="/user/token" method="post">
-    <input type="email" name="email">
-    <input type="password" name="password">
+    <div>
+        <label for="username">Email</label><br>
+        <input type="email" name="username" placeholder="johndoe@example.com">
+    </div>
+
+    <div>
+        <label for="password">Password</label><br>
+        <input type="password" name="password" placeholder="Password">
+    </div>
 
     <button type="submit">Log In</button>
 </form>
