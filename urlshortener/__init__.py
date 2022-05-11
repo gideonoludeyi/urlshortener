@@ -8,7 +8,6 @@ from nanoid import generate  # type: ignore
 
 from .client import Client
 from .client.inmemoryclient import InMemoryClient
-from .invalid_credentials import InvalidCredentials
 from .user.api import router as user_router
 from .user.current_user import current_user
 
@@ -30,11 +29,6 @@ app = FastAPI()
 app.include_router(user_router, prefix='/user')
 
 templates = Jinja2Templates(directory='templates')
-
-
-@app.exception_handler(InvalidCredentials)
-def redirect_to_login(request: Request, exc: InvalidCredentials):
-    return RedirectResponse('/login', status_code=401)
 
 
 @app.get('/')
