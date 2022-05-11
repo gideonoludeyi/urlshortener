@@ -8,8 +8,8 @@ from nanoid import generate  # type: ignore
 from .client import Client
 from .client.inmemoryclient import InMemoryClient
 from .invalid_credentials import InvalidCredentials
-from .user.api import current_user
 from .user.api import router as user_router
+from .user.current_user import current_user
 
 
 def generate_code():
