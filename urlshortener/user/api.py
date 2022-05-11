@@ -9,6 +9,7 @@ from ..client.inmemoryclient import InMemoryClient
 from .jwt import create_access_token, decode_token, serialize_datetime
 from .pwd import hash_password, verify_password
 from .schema import User, UserInDB
+from ..invalid_credentials import InvalidCredentials
 
 router = APIRouter()
 
@@ -31,10 +32,6 @@ def get_db():
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-class InvalidCredentials(Exception):
-    pass
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(get_db)) -> UserInDB:
