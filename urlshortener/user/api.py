@@ -64,7 +64,7 @@ def authenticate_user(email: str, password: str, db: Client) -> User | None:
     user = db.get(email)
     if user is not None:
         user_in_db = UserInDB(**user)
-        if verify_password(password=password, hashed_password=user_in_db.hashed_password):
+        if verify_password(password, user_in_db.hashed_password):
             return User(**user_in_db.dict())
         else:
             return None
