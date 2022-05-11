@@ -38,12 +38,6 @@ class InvalidCredentials(Exception):
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(get_db)) -> UserInDB:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
     try:
         payload = decode_token(token)
     except JWTError as e:
