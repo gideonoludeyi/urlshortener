@@ -1,5 +1,6 @@
 from string import ascii_letters, digits
 
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -10,8 +11,6 @@ from .client.inmemoryclient import InMemoryClient
 from .invalid_credentials import InvalidCredentials
 from .user.api import router as user_router
 from .user.current_user import current_user
-
-from dotenv import load_dotenv
 
 load_dotenv()
 
