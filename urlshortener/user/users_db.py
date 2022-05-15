@@ -1,3 +1,4 @@
+from ..client.base import Client
 from ..client.inmemoryclient import InMemoryClient
 
 client = InMemoryClient()
@@ -13,5 +14,5 @@ client.set('alice@example.com', {
 })
 
 
-def users_db():
+def users_db() -> Client:
     return client
