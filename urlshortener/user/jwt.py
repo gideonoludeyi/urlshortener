@@ -32,9 +32,7 @@ def create_access_token(email: str):
 
 
 def decode_token(token: str):
-    jwt_data = token.split(' ', maxsplit=1)[1]  # strip off 'Bearer ' header
-
-    data: dict = jwt.decode(jwt_data, key=SECRET_KEY, algorithms=[ALGORITHM])
+    data: dict = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
 
     return Payload(
         email=data['sub'],

@@ -2,21 +2,16 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, Field
 
 from ..client.base import Client
-from ..invalid_credentials import InvalidCredentials
 from .current_user import current_user
 from .jwt import create_access_token, serialize_datetime
 from .pwd import hash_password, verify_password
 from .schema import User, UserInDB
 from .users_db import users_db
 
-router = APIRouter()
-
-
-@router.get('/')
-def show_current_user(user: UserInDB = Depends(current_user)):
-    return User(**user.dict())
+router = APIRouter(tags=['user'])
 
 
 def authenticate_user(email: str, password: str, db: Client) -> User | None:
@@ -31,7 +26,18 @@ def authenticate_user(email: str, password: str, db: Client) -> User | None:
         return None
 
 
-@router.post('/token')
+@router.get('/', response_model=User)
+def show_current_user(user: UserInDB = Depends(current_user)):
+    return dict(user)
+
+
+class Token(BaseModel):
+    access_token: str = Field(
+        title='The JWT access token for clients to perform authenticated requests')
+    token_type: str = Field(title='The type of token (bearer, basic, e.t.c)')
+
+
+@router.post('/token', response_model=Token)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(users_db)):
     user = authenticate_user(
         email=form.username,
@@ -39,13 +45,17 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(user
         db=db)
 
     if user is None:
-        raise InvalidCredentials
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     token = create_access_token(email=user.email)
     return {'access_token': token, 'token_type': 'bearer'}
 
 
-@router.post('/create', status_code=status.HTTP_201_CREATED)
+@router.post('/signup', status_code=status.HTTP_201_CREATED)
 def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(users_db)):
     email = form.username
     hashed_password = hash_password(form.password)
@@ -56,11 +66,11 @@ def signup(form: OAuth2PasswordRequestForm = Depends(), db: Client = Depends(use
         raise HTTPException(status_code=status.HTTP_200_OK,
                             detail='Email already in use')
 
-    db.set(key=user.email, data=user.dict())
+    db.set(key=user.email, data=dict(user))
 
 
 @router.post('/logout')
 def logout(user: UserInDB = Depends(current_user), db: Client = Depends(users_db)):
     now = datetime.utcnow()
     user.ignore_access_tokens_before = serialize_datetime(now)
-    db.set(key=user.email, data=user.dict())
+    db.set(key=user.email, data=dict(user))

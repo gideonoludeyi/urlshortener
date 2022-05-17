@@ -1,10 +1,11 @@
 from string import ascii_letters, digits
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from nanoid import generate  # type: ignore
+from pydantic import BaseModel, Field, HttpUrl
 
 from .client import Client
 from .client.inmemoryclient import InMemoryClient
@@ -26,36 +27,37 @@ def get_client():
 
 app = FastAPI()
 
+app.mount('/static', app=StaticFiles(directory='web/build/static'), name='static')
+
 app.include_router(user_router, prefix='/user')
 
-templates = Jinja2Templates(directory='templates')
+
+@app.get('/', response_class=FileResponse)
+def index():
+    return FileResponse('web/build/index.html')
 
 
-@app.get('/')
-def index(request: Request):
-    return templates.TemplateResponse('index.html.jinja2', {'request': request})
+class ShortenData(BaseModel):
+    url: HttpUrl = Field(title="The url to shorten")
 
 
-@app.get('/login')
-def login(request: Request):
-    return templates.TemplateResponse('login.html.jinja2', {'request': request})
-
-
-@app.post('/', response_class=JSONResponse, dependencies=[Depends(current_user)])
-def shorten(request: Request, url: str = Form(...), client: Client = Depends(get_client)):
+@app.post('/url', response_class=JSONResponse, dependencies=[Depends(current_user)])
+def shorten(request: Request, body: ShortenData, client: Client = Depends(get_client)):
     code = generate_code()
     while client.exists(code):
         code = generate_code()
 
-    client.set(code, {'url': url})
-    return templates.TemplateResponse('url.html.jinja2', {'request': request, 'code': code})
+    client.set(code, {'url': body.url})
+
+    return {
+        'url': f'{request.base_url}r/{code}'
+    }
 
 
-@app.get('/r/{code}')
+@app.get('/r/{code}', response_class=RedirectResponse)
 def redirect(code: str, client: Client = Depends(get_client)):
     data = client.get(code)
     if data is None:
         raise HTTPException(status_code=404, detail="Code not found")
 
-    url = data['url']
-    return RedirectResponse(url=url)
+    return data['url']
