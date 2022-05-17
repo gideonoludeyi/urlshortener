@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 
+const BASE_URL = 'http://localhost:8000';
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -22,20 +24,17 @@ export const useLoginWithEmailAndPassword = () => {
     const loginWithEmailAndPassword = useCallback(
         async ({ email, password }) => {
             try {
-                const response = await fetch(
-                    'http://localhost:8000/user/token',
-                    {
-                        method: 'POST',
-                        body: new URLSearchParams({
-                            username: email,
-                            password,
-                        }),
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
+                const response = await fetch(`${BASE_URL}/user/token`, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        username: email,
+                        password,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 const result = await response.json();
                 const accessToken = result['access_token'];
                 setToken(accessToken);
@@ -56,7 +55,7 @@ export const useLogout = () => {
     const logout = useCallback(async () => {
         if (token === null) return;
         try {
-            await fetch('http://localhost:8000/user/logout', {
+            await fetch(`${BASE_URL}/user/logout`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -80,7 +79,7 @@ export const useFetch = (path, method, initialValue) => {
     const sendRequest = useCallback(
         async (data) => {
             // TODO: handle unauthenticated case
-            const response = await fetch(`http://localhost:8000${path}`, {
+            const response = await fetch(`${BASE_URL}${path}`, {
                 method,
                 body: JSON.stringify(data),
                 headers: {
