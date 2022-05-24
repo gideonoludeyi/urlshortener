@@ -7,7 +7,7 @@ from .jwt import decode_token
 from .schema import UserInDB
 from .users_db import users_db
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/token")
 
 
 def current_user(token: str = Depends(oauth2_scheme), db: Client = Depends(users_db)) -> UserInDB:
