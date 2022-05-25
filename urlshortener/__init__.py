@@ -7,6 +7,8 @@ from fastapi.staticfiles import StaticFiles
 from nanoid import generate  # type: ignore
 from pydantic import BaseModel, Field, HttpUrl
 
+from .client.sqliteclient import SQLiteClient
+
 from .client import Client
 from .client.inmemoryclient import InMemoryClient
 from .user.api import router as user_router
@@ -21,7 +23,7 @@ def generate_code():
 
 
 def get_client():
-    with InMemoryClient() as client:
+    with SQLiteClient(table_name='urls', key_name='code') as client:
         yield client
 
 
