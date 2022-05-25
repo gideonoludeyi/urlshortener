@@ -17,6 +17,6 @@ from ..client.base import Client
 # })
 
 
-def users_db() -> Client:
+def users_db():
     with SQLiteClient(table_name='users', key_name='email') as client:
         yield client
